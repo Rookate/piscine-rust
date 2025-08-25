@@ -1,0 +1,26 @@
+# Rust / Cargo
+**/target/
+**/Cargo.lock
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Fichiers de build et caches
+*.swp
+*.bak
+*.rs.bk
+
+# IDE (VSCode, IntelliJ, etc.)
+.idea/
+.vscode/
+*.vsix
+
+# Fichiers de logs et outputs
+*.log
+*.out
+
+# Fichiers de dépendances et caches
+**/node_modules/
+.env
