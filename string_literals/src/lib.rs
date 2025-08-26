@@ -15,7 +15,7 @@ pub fn split_at(v: &str, index: usize) -> (&str, &str) {
 }
 
 pub fn find(v: &str, pat: char) -> usize {
-    v.chars().filter(|&c| c == pat).count()
+    v.find(pat).unwrap_or(usize::MAX)
 }
 
 #[cfg(test)]
