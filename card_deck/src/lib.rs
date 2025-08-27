@@ -5,7 +5,6 @@ pub enum Suit {
     Spade,
     Club,
 }
-
 #[derive(Debug, PartialEq)]
 pub enum Rank {
     Ace,
@@ -17,26 +16,37 @@ pub enum Rank {
 
 impl Suit {
     pub fn random() -> Suit {
-        // génère 0..=3
-        let n = pseudo_random_u8(4);
-        Suit::translate(n)
+        let value = (std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .subsec_nanos()
+            % 4)
+            + 1;
+
+        Suit::translate(value as u8)
     }
 
     pub fn translate(value: u8) -> Suit {
         match value {
-            0 => Suit::Heart,
-            1 => Suit::Diamond,
-            2 => Suit::Spade,
-            3 => Suit::Club,
-            _ => panic!("Invalid suit"),
+            1 => Suit::Heart,
+            2 => Suit::Diamond,
+            3 => Suit::Spade,
+            4 => Suit::Club,
+            _ => panic!("Invalid rank"),
         }
     }
 }
 
 impl Rank {
     pub fn random() -> Rank {
-        let n = 1 + pseudo_random_u8(13);
-        Rank::translate(n)
+        let value = (std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .subsec_nanos()
+            % 13)
+            + 1;
+
+        Rank::translate(value as u8)
     }
 
     pub fn translate(value: u8) -> Rank {
@@ -45,12 +55,11 @@ impl Rank {
             11 => Rank::Jack,
             12 => Rank::Queen,
             13 => Rank::King,
-            v @ 2..=10 => Rank::Number(v),
-            _ => panic!("Invalid rank"),
+            value if value >= 2 && value < 11 => Rank::Number(value),
+            _ => panic!("invalid Rank!!"),
         }
     }
 }
-
 #[derive(Debug, PartialEq)]
 pub struct Card {
     pub suit: Suit,
@@ -65,14 +74,6 @@ pub fn winner_card(card: &Card) -> bool {
             rank: Rank::Ace
         }
     )
-}
-
-fn pseudo_random_u8(max: u8) -> u8 {
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .subsec_nanos();
-    (nanos % max as u32) as u8
 }
 
 #[cfg(test)]
