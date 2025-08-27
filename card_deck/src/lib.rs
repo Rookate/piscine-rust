@@ -67,7 +67,6 @@ pub fn winner_card(card: &Card) -> bool {
     )
 }
 
-// Ton petit générateur pseudo-aléatoire basé sur l’horloge
 fn pseudo_random_u8(max: u8) -> u8 {
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
