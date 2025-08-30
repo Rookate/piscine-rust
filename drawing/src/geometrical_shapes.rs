@@ -226,7 +226,7 @@ impl Drawable for Rectangle {
     }
 }
 
-/* -------------------------- Rectangle -------------------------- */
+/* -------------------------- Circle -------------------------- */
 pub struct Circle {
     center: Point,
     radius: i32,
