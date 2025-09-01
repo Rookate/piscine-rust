@@ -2,13 +2,13 @@ use chrono::Local;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct FormError {
-    pub form_values: (String, String),
+    pub form_values: (&'static str, String),
     pub date: String,
-    pub err: String,
+    pub err: &'static str,
 }
 
 impl FormError {
-    pub fn new(field_name: String, field_value: String, err: String) -> FormError {
+    pub fn new(field_name: &'static str, field_value: String, err: &'static str) -> Self {
         FormError {
             form_values: (field_name, field_value),
             date: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
@@ -27,16 +27,16 @@ impl Form {
     pub fn validate(&self) -> Result<(), FormError> {
         if self.name.is_empty() {
             return Err(FormError::new(
-                "name".to_string(),
+                "name",
                 self.name.to_string(),
-                format!("Username is empty"),
+                "Username is empty",
             ));
         }
         if self.password.len() < 8 {
             return Err(FormError::new(
-                "password".to_string(),
+                "password",
                 self.password.to_string(),
-                format!("Password should be at least 8 characters long"),
+                "Password should be at least 8 characters long",
             ));
         }
 
@@ -45,9 +45,9 @@ impl Form {
         let has_non_alphanumeric = self.password.chars().any(|c| !c.is_alphanumeric());
         if !has_alphabetic || !has_non_alphanumeric || !has_numeric {
             return Err(FormError::new(
-                "password".to_string(),
+                "password",
                 self.password.to_string(),
-                format!("Password should be a combination of ASCII numbers, letters and symbols"),
+                "Password should be a combination of ASCII numbers, letters and symbols",
             ));
         }
         Ok(())
