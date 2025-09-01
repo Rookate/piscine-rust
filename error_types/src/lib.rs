@@ -1,20 +1,16 @@
 use chrono::Local;
-use std::collections::HashMap;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct FormError {
-    pub form_values: HashMap<String, String>,
+    pub form_values: (String, String),
     pub date: String,
     pub err: String,
 }
 
 impl FormError {
     pub fn new(field_name: String, field_value: String, err: String) -> FormError {
-        let mut form_values = HashMap::new();
-        form_values.insert(field_name, field_value);
-
         FormError {
-            form_values,
+            form_values: (field_name, field_value),
             date: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             err,
         }
