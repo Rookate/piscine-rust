@@ -19,8 +19,6 @@ impl FormError {
             err,
         }
     }
-
-    //
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -35,14 +33,14 @@ impl Form {
             return Err(FormError::new(
                 "name".to_string(),
                 self.name.to_string(),
-                "Username is empty".to_string(),
+                format!("Username is empty"),
             ));
         }
         if self.password.len() < 8 {
             return Err(FormError::new(
                 "password".to_string(),
                 self.password.to_string(),
-                "Password should be at least 8 characters long".to_string(),
+                format!("Password should be at least 8 characters long"),
             ));
         }
 
@@ -53,8 +51,7 @@ impl Form {
             return Err(FormError::new(
                 "password".to_string(),
                 self.password.to_string(),
-                "Password should be a combination of ASCII numbers, letters and symbols"
-                    .to_string(),
+                format!("Password should be a combination of ASCII numbers, letters and symbols"),
             ));
         }
         Ok(())
