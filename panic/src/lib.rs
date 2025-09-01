@@ -1,4 +1,4 @@
-use std::fs::{self, File};
+use std::fs::File;
 
 pub fn open_file(s: &str) -> File {
     File::open(s).unwrap()
@@ -7,6 +7,7 @@ pub fn open_file(s: &str) -> File {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
 
     #[test]
     fn it_works() {
