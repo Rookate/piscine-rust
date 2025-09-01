@@ -1,6 +1,5 @@
-mod err;
-use err::{ParseErr, ReadErr};
-
+pub mod err;
+pub use crate::err::{ParseErr, ReadErr};
 pub use json::{parse, stringify};
 pub use std::error::Error;
 use std::{fs::File, io::Read};
@@ -20,49 +19,103 @@ pub struct TodoList {
 
 impl TodoList {
     pub fn get_todo(path: &str) -> Result<TodoList, Box<dyn Error>> {
+        eprintln!("[get_todo] Opening file: {}", path);
+
         let mut file = File::open(path).map_err(|e| {
+            eprintln!("[get_todo] ERROR opening file: {e}");
             Box::new(ReadErr {
                 child_err: Box::new(e),
             }) as Box<dyn Error>
         })?;
+
+        eprintln!("[get_todo] File opened successfully.");
+
         let mut s = String::new();
         file.read_to_string(&mut s).map_err(|e| {
+            eprintln!("[get_todo] ERROR reading file: {e}");
             Box::new(ReadErr {
                 child_err: Box::new(e),
             }) as Box<dyn Error>
         })?;
+
+        eprintln!(
+            "[get_todo] File read successfully, length={} chars",
+            s.len()
+        );
+
         if s.trim().is_empty() {
+            eprintln!("[get_todo] ERROR: file is empty after trim");
             return Err(Box::new(ParseErr::Empty));
         }
-        let parsed_json = parse(&s).map_err(|e| Box::new(ParseErr::Malformed(Box::new(e))))?;
+
+        eprintln!("[get_todo] Raw content:\n{}", s);
+
+        let parsed_json = parse(&s).map_err(|e| {
+            eprintln!("[get_todo] ERROR parsing JSON: {:?}", e);
+            Box::new(ParseErr::Malformed(Box::new(e))) as Box<dyn Error>
+        })?;
+
+        eprintln!("[get_todo] JSON parsed successfully: {:?}", parsed_json);
+
         let title = parsed_json["title"]
             .as_str()
-            .ok_or_else(|| Box::new(ParseErr::Empty))?
+            .ok_or_else(|| {
+                eprintln!("[get_todo] ERROR: missing or invalid title field");
+                Box::new(ParseErr::Empty) as Box<dyn Error>
+            })?
             .to_string();
 
-        let mut tasks: Vec<Task> = Vec::new();
+        eprintln!("[get_todo] Title parsed: {}", title);
+
         if parsed_json["tasks"].len() == 0 {
+            eprintln!("[get_todo] ERROR: no tasks found");
             return Err(Box::new(ParseErr::Empty));
         }
 
+        eprintln!(
+            "[get_todo] Found {} tasks, start parsing...",
+            parsed_json["tasks"].len()
+        );
+
+        let mut tasks = Vec::new();
         for i in 0..parsed_json["tasks"].len() {
-            let task = Task {
-                id: parsed_json["tasks"][i]["id"]
-                    .as_u32()
-                    .ok_or(Box::new(ParseErr::Empty))?,
-                description: parsed_json["tasks"][i]["description"]
-                    .as_str()
-                    .ok_or_else(|| Box::new(ParseErr::Empty))?
-                    .to_string(),
-                level: parsed_json["tasks"][i]["level"]
-                    .as_u32()
-                    .ok_or_else(|| Box::new(ParseErr::Empty))?,
-            };
-            tasks.push(task)
+            eprintln!("[get_todo] Parsing task {}", i);
+
+            let id = parsed_json["tasks"][i]["id"].as_u32().ok_or_else(|| {
+                eprintln!("[get_todo] ERROR: invalid id at task {}", i);
+                Box::new(ParseErr::Empty) as Box<dyn Error>
+            })?;
+
+            let desc = parsed_json["tasks"][i]["description"]
+                .as_str()
+                .ok_or_else(|| {
+                    eprintln!("[get_todo] ERROR: invalid description at task {}", i);
+                    Box::new(ParseErr::Empty) as Box<dyn Error>
+                })?;
+
+            let level = parsed_json["tasks"][i]["level"].as_u32().ok_or_else(|| {
+                eprintln!("[get_todo] ERROR: invalid level at task {}", i);
+                Box::new(ParseErr::Empty) as Box<dyn Error>
+            })?;
+
+            eprintln!(
+                "[get_todo] Parsed task {} → id={}, desc='{}', level={}",
+                i, id, desc, level
+            );
+
+            tasks.push(Task {
+                id,
+                description: desc.to_string(),
+                level,
+            });
         }
+
+        eprintln!("[get_todo] SUCCESS: parsed {} tasks", tasks.len());
+
         Ok(TodoList { title, tasks })
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -8,14 +8,20 @@ pub enum ParseErr {
     Malformed(Box<dyn Error>),
 }
 
+impl Display for ParseErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Failed to parse todo file")
+    }
+}
+
 #[derive(Debug)]
 pub struct ReadErr {
     pub child_err: Box<dyn Error>,
 }
 
-impl Display for ParseErr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Failed to parse todo file")
+impl Display for ReadErr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Failed to read todo file")
     }
 }
 
@@ -23,7 +29,7 @@ impl Error for ParseErr {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             ParseErr::Empty => None,
-            ParseErr::Malformed(inner) => Some(inner.as_ref()),
+            ParseErr::Malformed(_) => Some(self),
         }
     }
 }
@@ -31,11 +37,5 @@ impl Error for ParseErr {
 impl Error for ReadErr {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(self.child_err.as_ref())
-    }
-}
-
-impl Display for ReadErr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Failed to read todo file")
     }
 }
